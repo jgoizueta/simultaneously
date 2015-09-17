@@ -1,6 +1,6 @@
 {
   "name": "simultaneously",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "asynchronous operations with limited concurrency",
   "main": "lib/simultaneously.js",
   "directories": {
