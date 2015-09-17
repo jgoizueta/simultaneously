@@ -1,6 +1,10 @@
 module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-mocha-test'
   grunt.initConfig
+    coffee:
+      compile:
+        files:
+          'lib/simultaneously.js': ['simultaneously.coffee']
     mochaTest:
       test:
         options:
@@ -8,4 +12,6 @@ module.exports = (grunt) ->
           require: 'coffee-script/register'
           quiet: false
         src: ['test/**/*.coffee']
-  grunt.registerTask 'default', 'mochaTest'
+  grunt.registerTask 'default', ['coffee', 'mochaTest']
+  grunt.registerTask 'test', 'mochaTest'
+  grunt.loadNpmTasks 'grunt-contrib-coffee'

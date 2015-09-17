@@ -2,7 +2,7 @@
   "name": "simultaneously",
   "version": "1.0.1",
   "description": "asynchronous operations with limited concurrency",
-  "main": "simultaneously.coffee",
+  "main": "lib/simultaneously.js",
   "scripts": {
     "test": "grunt"
   },
@@ -21,11 +21,12 @@
   },
   "homepage": "https://github.com/jgoizueta/simultaneously#readme",
   "devDependencies": {
+    "coffee-script": "^1.10.0",    
     "grunt": "^0.4.5",
+    "grunt-contrib-coffee": "^0.13.0",
     "grunt-mocha-test": "^0.12.7",
     "mocha": "^2.2.5"
   },
   "dependencies": {
-    "coffee-script": "^1.10.0"
   }
 }

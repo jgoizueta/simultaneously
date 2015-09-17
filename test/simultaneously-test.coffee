@@ -1,7 +1,7 @@
 assert = require "assert"
 
 describe 'simultaneously', ->
-  simultaneously = require '../simultaneously'
+  simultaneously = require '../lib/simultaneously'
 
   check_all_processed = (n, limit, callback) ->
     data = (i for i in [1..n])
