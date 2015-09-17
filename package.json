@@ -1,6 +1,6 @@
 {
   "name": "simultaneously",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "asynchronous operations with limited concurrency",
   "main": "simultaneously.coffee",
   "scripts": {
@@ -14,7 +14,7 @@
     "concurrency",
     "asynchronous"
   ],
-  "author": "Javier Goizueta",
+  "author": "Javier Goizueta <jgoizueta@gmail.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/jgoizueta/simultaneously/issues"
