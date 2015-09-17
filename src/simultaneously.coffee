@@ -24,7 +24,7 @@ class Concurrently
         options = {}
     @elements = elements
     @callback = callback || options.then
-    @limit = options.limit || 100
+    @limit = options.limit || 20
     @size = @elements.length
     @left = @size
     @running = 0
