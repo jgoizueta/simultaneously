@@ -1,5 +1,4 @@
 assert = require "assert"
-_ = require "underscore"
 
 describe 'simultaneously', ->
   simultaneously = require '../simultaneously'
