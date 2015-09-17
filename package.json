@@ -3,6 +3,10 @@
   "version": "1.0.2",
   "description": "asynchronous operations with limited concurrency",
   "main": "lib/simultaneously.js",
+  "directories": {
+    "test": "test",
+    "lib": "lib"
+  },
   "scripts": {
     "test": "grunt"
   },
