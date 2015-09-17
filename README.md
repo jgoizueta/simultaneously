@@ -6,6 +6,12 @@ This module is written in CoffeeScript and examples are given
 in that language. JavaScript use examples are left as
 an exercise for the reader.
 
+## Installation
+
+```bash
+npm install simultaneously --save
+```
+
 ## Example
 
 The problem: yo have a nice asynchronous function, say `fs.copy`,
