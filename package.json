@@ -2,7 +2,7 @@
   "name": "simultaneously",
   "version": "1.0.0",
   "description": "asynchronous operations with limited concurrency",
-  "main": "simuntaneously.coffee",
+  "main": "simultaneously.coffee",
   "scripts": {
     "test": "grunt"
   },
