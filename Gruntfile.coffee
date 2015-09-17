@@ -4,7 +4,7 @@ module.exports = (grunt) ->
     coffee:
       compile:
         files:
-          'lib/simultaneously.js': ['simultaneously.coffee']
+          'lib/simultaneously.js': ['src/*.coffee']
     mochaTest:
       test:
         options:
