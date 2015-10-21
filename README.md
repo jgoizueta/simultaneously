@@ -1,16 +1,12 @@
 # simultaneously
 
-Execute multiple asynchronous operations with limited concurrency.
+#### Execute multiple asynchronous operations with limited concurrency.
+
+[![NPM](https://nodei.co/npm/simultaneously.png)](https://nodei.co/npm/simultaneously/)
 
 This module is written in CoffeeScript and examples are given
 in that language. JavaScript use examples are left as
 an exercise for the reader.
-
-## Installation
-
-```bash
-npm install simultaneously --save
-```
 
 ## Example
 
