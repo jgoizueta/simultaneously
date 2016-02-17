@@ -1,57 +1,62 @@
-# Execute multiple asynchronous operations
-# with limited concurrency.
-#
-# Example:
-# Assuming we have a funcion `load(image, callback)` that
-# loads an image asynchronously and then calls callback:
-#
-#     concurrently = require 'concurrently'
-#     images = ['img1.jpg', 'img2.jpg']
-#     concurrently images,
-#       limit: 10
-#       each: (image, done) ->
-#         load image
-#         done()
-#       then: (error) ->
-#         console.log "All images have been loaded"
-#
-class Concurrently
-
-  constructor: (elements, options, callback) ->
-    unless callback?
-      if typeof options is 'function'
-        callback = options
-        options = {}
-    @elements = elements
-    @callback = callback || options.then
+class Simultaneously
+  constructor: (options = {}) ->
     @limit = options.limit || 20
-    @size = @elements.length
+    @tasks = []
+    @results = []
+    @collector = null
+    @error_handler = null
+
+  execute: (args...) ->
+    task = args.pop()
+    @tasks.push [task, args]
+    @results.push null
+
+  execute_for: (collection, task) ->
+    @execute item, task for item in collection
+
+  collect: (collector) ->
+    @collector = collector
+
+  on_error: (eh) ->
+    @error_handler = eh
+
+  run: ->
+    @size = @tasks.length
     @left = @size
     @running = 0
     @current = -1
     @error = null
-    @each options.each if options.each?
+    @each()
 
-  each: (processor) ->
+  each: ->
     if !@error && @current < @size - 1
       if @running >= @limit
-        setImmediate => @each processor
+        setImmediate => @each()
       else
         @running++
         @current += 1
         i = @current
-        element = @elements[i]
+        [task, args] = @tasks[i]
         do (i) =>
-          processor element, (error) =>
+          args.push (error, result) =>
             @running--
             @left--
             @error ||= error
+            @results[i] = result
             @check_for_completion()
-        @each processor
+          task args...
+        @each()
 
   check_for_completion: (p) ->
-    if @running == 0 && (@error || @left == 0)
-      @callback @error
+    if @running == 0
+      if @error
+        @error_handler? @error
+      else if @left == 0
+        @collector @results
 
-module.exports = (elements, options, callback) ->
-  new Concurrently(elements, options, callback)
+simultaneously = (options, f) ->
+  p = new Simultaneously options
+  f.call p
+  p.run()
+
+module.exports = simultaneously

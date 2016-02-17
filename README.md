@@ -4,9 +4,11 @@
 
 [![NPM](https://nodei.co/npm/simultaneously.png)](https://nodei.co/npm/simultaneously/)
 
-This module is written in CoffeeScript and examples are given
-in that language. JavaScript use examples are left as
-an exercise for the reader.
+This is intended to be used from CoffeScript, as it takes advantage
+of that language's syntax. Other modules such as
+[Async](https://www.npmjs.com/package/async) (`async.parallel`) or
+[Step](https://www.npmjs.com/package/step) (using `this.parallel`)
+are probably a better match for JavaScript.
 
 ## Example
 
@@ -34,32 +36,48 @@ for file in files_to_be_copied
 # ... ?
 ```
 
-The solution: using `simultaneously`
-you provide an `each` function to Process
-each element. This function receives the element to be processed
-and a callback that must be called when the processing is complete.
-You pass an `error` object to that callback if an error occurred.
+The solution: use `simultaneously` passing a function to it.
+Inside the function (which is executed with a special `this`
+value) you can call `@execute` to define tasks to be executed
+parallelly. Each task must finish calling the `done` parameter
+which is passed to it; the first argument to `done` is
+and error object to be used in the case of error, and you
+can pass an additional parameter to send results which will be collected later.
+Using `@collect` you can define an action to be executed when
+all the tasks finish, and which will receive an array with all
+the results of the tasks. The results appear in this array in the
+order of definition of the corresponding tasks.
+The `@on_error` method can be used set up a function that
+will be called in the case of error.
 
-You also provide a `then` function that will be called when
-the processing is complete for all elements or an error has occurred
-(the error object will be passed as an argument).
-
- ```coffeescript
+```coffeescript
 fs = require 'fs'
 simultaneously = require 'simultaneously'
 
+simultaneously ->
+  @execute (done) -> fs.copy 'file1', 'dest/file1', done
+  @execute (done) -> fs.copy 'file2', 'dest/file1', done
+  @execute (done) -> fs.copy 'file3', 'dest/file1', done
+  @collect -> do_something_after_all_files_are_copied()
+  @on_error (error) -> handle_the_error error
+```
+
+This example could have been written also as:
+
+```coffeescript
+fs = require 'fs'
+simultaneously = require 'simultaneously'
 files_to_be_copied = ['file1', 'file2', 'file3']
 
-simultaneously files_to_be_copied,
-  each: (file, done) ->
-    # Process each element, then call `done()``
+simultaneously ->
+  @execute_for files_to_be_copied, (file, done) ->
     fs.copy file, 'dest/'+file, done
-  then: (error) ->
-    if error
-      handle_the_error error
-    else
-      do_something_after_all_files_are_copied()
+  @collect -> do_something_after_all_files_are_copied()
+  @on_error (error) -> handle_the_error error
 ```
+
+Note that you can use any number of `@execute` and `@execute_for`
+definitions inside a `simultaneously` block.
 
 ## Limit
 
@@ -79,17 +97,43 @@ handle more than 100 of them at a time:
 ```coffeescript
 fs = require 'fs'
 simultaneously = require 'simultaneously'
-
 lots_of_files = ("file#{i}" for i in [1..1000000])
 
-simultaneously files_to_be_copied,
-  limit: 100
-  each: (file, done) ->
-    # Process each element, then call `done()``
+simultaneously limit: 100, ->
+  @execute_for lots_of_files, (file, done) ->
     fs.copy file, 'dest/'+file, done
-  then: (error) ->
-    if error
-      handle_the_error error
-    else
-      do_something_after_all_files_are_copied()
+  @collect -> do_something_after_all_files_are_copied()
+  @on_error (error) -> handle_the_error error
+```
+
+## More examples
+
+```coffeescript
+simultaneously limit: 8, ->
+  @execute (done) ->
+    download_file 'url', (error, data) ->
+      done error, data
+  @execute_for [1..10], (i, done) ->
+    download_file "url_#{i}", (error, data) ->
+    done error, data
+  @collect (results) ->
+    console.log "concatenated files", results.join('')
+  @handle_error (err) ->
+    console.log "an error ocurred:", err
+```
+
+```coffeescript
+fs = require 'fs'
+parallelly = require 'parallelly'
+
+files_to_be_copied = ['file1', 'file2', 'file3']
+
+simultaneously ->
+  @execute_for files_to_be_copied, (file, done) ->
+    # Process each element, then call `done()`
+    fs.copy file, 'dest/'+file, done
+  @collect ->
+    do_something_after_all_files_are_copied()
+  @on_error (error) ->
+    handle_the_error error
 ```
