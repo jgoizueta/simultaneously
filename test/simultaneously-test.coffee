@@ -46,8 +46,26 @@ describe 'simultaneously', ->
           done null
       @collect ->
         assert.ok false
+        callback()
       @on_error (error) ->
         assert.equal 'error', error
+        callback()
+
+  check_errors_abort = (n, limit, callback) ->
+    data = (i for i in [1..n])
+    error_i = n/2
+    simultaneously limit: limit, ->
+      @execute_for data, (i, done) ->
+        if i == error_i
+          done i
+        else
+          assert.ok i < n/2
+          done null
+      @collect ->
+        assert.ok false
+        callback()
+      @on_error (error) ->
+        assert.equal error, error_i
         callback()
 
   check_no_errors = (n, limit, callback) ->
@@ -85,6 +103,11 @@ describe 'simultaneously', ->
     for limit in limits
       it "should not generate false errors for #{n} elements, limit #{limit}", (done) ->
         check_no_errors n, limit, done
+
+  for [n, limits] in [ [10, [5, 10, 11, 15]], [2, [2, 1]], [300, [5, 1, 100, 300, 400]] ]
+    for limit in limits
+      it "should abort on error for #{n} elements, limit #{limit}", (done) ->
+        check_errors_abort n, limit, done
 
   it "should be callable without options", (done) ->
     simultaneously ->
