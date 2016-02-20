@@ -106,6 +106,28 @@ simultaneously limit: 100, ->
   @on_error (error) -> handle_the_error error
 ```
 
+## Scope
+
+If you need to access the outer scope (`this`) from
+the tasks or error handler you can pass it through
+the `scope` option and it will become the `this`
+value when task or error handlers are executed:
+
+```coffeescript
+@value = 10 # will need to use this...
+simultaneously scope: this, ->
+  @execute (done) ->
+    # Now this has the same value as in the scope enclosing Simultaneously
+    console.log @value # => 10
+    done null
+  @collect  ->
+    # ... and here too:
+    console.log @value # => 10
+  @handle_error (err) ->
+    # ... or here:
+    console.log @value # => 10
+```
+
 ## More examples
 
 ```coffeescript
