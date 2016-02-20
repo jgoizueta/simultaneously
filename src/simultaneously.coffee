@@ -5,6 +5,7 @@ class Simultaneously
     @results = []
     @collector = null
     @error_handler = null
+    @scope = options.scope
 
   execute: (args...) ->
     task = args.pop()
@@ -44,15 +45,24 @@ class Simultaneously
             @error ||= error
             @results[i] = result
             @check_for_completion()
-          task args...
+          @execute_in_scope task, args
         @each()
 
   check_for_completion: (p) ->
     if @running == 0
       if @error
-        @error_handler? @error
+        if @error_handler
+          @execute_in_scope @error_handler, [@error]
+        else
+          throw @error
       else if @left == 0
-        @collector @results
+        @execute_in_scope @collector, [@results]
+
+  execute_in_scope: (f, args) ->
+    if @scope
+      f.apply @scope, args
+    else
+      f args...
 
 simultaneously = (options, f) ->
   unless f

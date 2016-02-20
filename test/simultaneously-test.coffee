@@ -95,19 +95,19 @@ describe 'simultaneously', ->
         assert.deepEqual results, ['value']
         done()
 
-  it "should execute tasks with the outer 'this'", (done) ->
+  it "should be able to define the scope for tasks", (done) ->
     @_outer_value = 1234
-    simultaneously ->
-    @execute (done) ->
-      assert.equal @_outer_value, 1234
-      done null
-    @collect ->
-      assert.equal @_outer_value, 1234
-      done()
+    simultaneously scope: this, ->
+      @execute (done) ->
+        assert.equal @_outer_value, 1234
+        done null
+      @collect ->
+        assert.equal @_outer_value, 1234
+        done()
 
-  it "should execute error handlers with the outer 'this'", (done) ->
+  it "should be able to define the scope for the error handler", (done) ->
     @_outer_value = 1234
-    simultaneously ->
+    simultaneously scope: this, ->
       @execute (done) ->
         assert.equal @_outer_value, 1234
         done 'error'
