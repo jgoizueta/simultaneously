@@ -55,6 +55,9 @@ class Simultaneously
         @collector @results
 
 simultaneously = (options, f) ->
+  unless f
+    f = options
+    options = {}
   p = new Simultaneously options
   f.call p
   p.run()

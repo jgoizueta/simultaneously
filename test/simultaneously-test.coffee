@@ -85,3 +85,35 @@ describe 'simultaneously', ->
     for limit in limits
       it "should not generate false errors for #{n} elements, limit #{limit}", (done) ->
         check_no_errors n, limit, done
+
+  it "should be callable without options", (done) ->
+    simultaneously ->
+      @execute (done) ->
+        assert.ok true
+        done null, 'value'
+      @collect (results) ->
+        assert.deepEqual results, ['value']
+        done()
+
+  it "should execute tasks with the outer 'this'", (done) ->
+    @_outer_value = 1234
+    simultaneously ->
+    @execute (done) ->
+      assert.equal @_outer_value, 1234
+      done null
+    @collect ->
+      assert.equal @_outer_value, 1234
+      done()
+
+  it "should execute error handlers with the outer 'this'", (done) ->
+    @_outer_value = 1234
+    simultaneously ->
+      @execute (done) ->
+        assert.equal @_outer_value, 1234
+        done 'error'
+      @on_error ->
+        assert.equal @_outer_value, 1234
+        done()
+      @collect ->
+        assert.ok false
+        done()
