@@ -194,3 +194,43 @@ describe 'simultaneously', ->
       block.collect =>
         assert.ok false
         done()
+
+  it "should pass individual methods", (done) ->
+    simultaneously (execute, collect, on_error) ->
+      execute (done) ->
+        done null, 110
+      execute [22, 33, 44], (i, done) ->
+        done null, i*10
+      collect (results) ->
+        assert.deepEqual results, [110, 220, 330, 440]
+        done()
+      on_error (err) ->
+        assert.ok false
+        done()
+
+  it "should pass individual methods, error", (done) ->
+    simultaneously (execute, collect, on_error) ->
+      execute (done) ->
+        done null, 110
+      execute [22, 33, 44], (i, done) ->
+        done 'error', i*10
+      collect (results) ->
+        assert.ok false
+        done()
+      on_error (err) ->
+        assert.equal err, 'error'
+        done()
+
+  it "should pass individual methods and preserve this scope", (done) ->
+    @_outer_value = 1234
+    simultaneously (execute, collect) =>
+      execute (done) =>
+        assert.equal @_outer_value, 1234
+        done null, 110
+      execute [22, 33, 44], (i, done) =>
+        assert.equal @_outer_value, 1234
+        done null, i*10
+      collect (results) =>
+        assert.equal @_outer_value, 1234
+        assert.deepEqual results, [110, 220, 330, 440]
+        done()

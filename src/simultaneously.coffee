@@ -71,8 +71,17 @@ simultaneously = (options, f) ->
   p = new Simultaneously options
   if f.length == 0
     f.call p
-  else
+  else if f.length == 1
     f p
+  else
+    exec = (args...) ->
+      if args.length == 1
+        p.execute args...
+      else
+        p.execute_for args...
+    collect = (results) -> p.collect results
+    error = (err) -> p.on_error err
+    f exec, collect, error
   p.run()
 
 module.exports = simultaneously
