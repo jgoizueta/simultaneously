@@ -128,6 +128,39 @@ simultaneously scope: this, ->
     console.log @value # => 10
 ```
 
+Alternatively, the `execute`, `collect`, etc. methods can be
+accessible through an argument to the function passed to `simultaneously`
+instead of through `this`:
+
+```coffeescript
+simultaneously (block) ->
+  block.execute (done) ->
+    # ...
+    done null
+  block.collect  ->
+    # ...
+  block.handle_error (err) ->
+    # ...
+```
+
+Using the block parameter access to the outer scope can now be
+achieved with the CoffeScript fat arrow:
+
+```coffeescript
+@value = 10 # will need to use this...
+simultaneously (block) =>
+  block.execute (done) =>
+    # Now this has the same value as in the scope enclosing Simultaneously
+    console.log @value # => 10
+    done null
+  blockcollect  =>
+    # ... and here too:
+    console.log @value # => 10
+  block.handle_error (err) =>
+    # ... or here:
+    console.log @value # => 10
+```
+
 ## More examples
 
 ```coffeescript

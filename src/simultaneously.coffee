@@ -69,7 +69,10 @@ simultaneously = (options, f) ->
     f = options
     options = {}
   p = new Simultaneously options
-  f.call p
+  if f.length == 0
+    f.call p
+  else
+    f p
   p.run()
 
 module.exports = simultaneously

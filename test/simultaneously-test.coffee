@@ -79,6 +79,38 @@ describe 'simultaneously', ->
       @on_error (error) ->
         assert.ok false
 
+  check_all_processed_sync_block = (n, limit, callback) ->
+    data = (i for i in [1..n])
+    simultaneously limit: limit, (block) ->
+      block.execute_for data, (i, done) -> done null, i
+      block.collect (results) ->
+        assert.deepEqual data, results
+        callback()
+
+  check_all_processed_async_block = (n, limit, callback) ->
+    data = (i for i in [1..n])
+    simultaneously limit: limit, (block) ->
+      block.execute_for data, (i, done) ->
+        setTimeout (-> done null, i), 20 + Math.random(90)
+      block.collect (results) ->
+        assert.deepEqual data, results
+        callback()
+
+  check_errors_block = (n, limit, callback) ->
+    data = (i for i in [1..n])
+    simultaneously limit: limit, (block) ->
+      block.execute_for data, (i, done) ->
+        if i == 1 + Math.floor(i/2)
+          done 'error'
+        else
+          done null
+      block.collect ->
+        assert.ok false
+        callback()
+      block.on_error (error) ->
+        assert.equal 'error', error
+        callback()
+
   for [n, limits] in [ [10, [5, 10, 11, 15]], [2, [2, 1]], [300, [5, 1, 100, 300, 400]] ]
     for limit in limits
       it "should process synchronously all data for #{n} elements, limit #{limit}", (done) ->
@@ -138,5 +170,27 @@ describe 'simultaneously', ->
         assert.equal @_outer_value, 1234
         done()
       @collect ->
+        assert.ok false
+        done()
+
+  for [n, limits] in [ [10, [5, 10, 11, 15]], [2, [2, 1]], [300, [5, 1, 100, 300, 400]] ]
+    for limit in limits
+      it "should use a block parameter sync", (done) ->
+        check_all_processed_sync_block n, limit, done
+      it "should use a block parameter async", (done) ->
+        check_all_processed_async_block n, limit, done
+      it "should use a block parameter errors", (done) ->
+        check_errors_block n, limit, done
+
+  it "should preserve this scope if function accepts block parameter", (done) ->
+    @_outer_value = 1234
+    simultaneously (block) =>
+      block.execute (done) =>
+        assert.equal @_outer_value, 1234
+        done 'error'
+      block.on_error =>
+        assert.equal @_outer_value, 1234
+        done()
+      block.collect =>
         assert.ok false
         done()
